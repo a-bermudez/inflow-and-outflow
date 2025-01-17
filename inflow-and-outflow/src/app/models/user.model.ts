@@ -1,17 +1,10 @@
 export class User {
+  static fromFirebase(email: string, nickName: string, uid: string) {
+    return new User(email, nickName, uid);
+  }
   constructor(
-    private uid: string,
-    private nickName: string,
-    private email: string
+    public email: string,
+    public nickName: string,
+    public uid: string
   ) {}
-
-  getUid(): string {
-    return this.uid;
-  }
-  getName(): string {
-    return this.nickName;
-  }
-  getEmail(): string {
-    return this.email;
-  }
 }

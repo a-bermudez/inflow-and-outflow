@@ -8,8 +8,11 @@ import {
   UserCredential,
 } from '@angular/fire/auth';
 import { Router } from '@angular/router';
+import { doc, Firestore } from '@angular/fire/firestore';
+import { Store } from '@ngrx/store';
+import { onSnapshot, setDoc } from '@firebase/firestore';
+import * as authActions from '../auth/auth.actions';
 import { User } from '../models/user.model';
-import { addDoc, collection, Firestore } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -17,11 +20,41 @@ import { addDoc, collection, Firestore } from '@angular/fire/firestore';
 export class AuthService {
   name: string = 'pepe';
   protected auth = getAuth();
-  constructor(private router: Router, private firestore: Firestore) {}
+  constructor(
+    private router: Router,
+    private firestore: Firestore,
+    private store: Store
+  ) {}
 
   initAuthListener() {
     onAuthStateChanged(this.auth, (user) => {
-      console.log('Bienvenido ', user?.email);
+      console.log(user);
+      const userRef = doc(this.firestore, `/Users/${user.uid}`);
+      onSnapshot(userRef, (snapshot) => {
+        if (snapshot) {
+          const userData = snapshot.data();
+          const activeUser: User = User.fromFirebase(
+            userData['email'],
+            userData['nickName'],
+            userData['uid']
+          );
+          this.store.dispatch(authActions.setUser({ user: activeUser }));
+        }
+      });
+      //Comentario con fines academicos, en concreto del uso de getDoc
+      // if (user) {
+      //   const userRef = doc(this.firestore, `/Users/${user.uid}`);
+      //   // Referencia al documento
+      //   getDoc(userRef).then((userData) => {
+      //     const activeUser: User = User.fromFirebase(
+      //       userData.data()['email'],
+      //       userData.data()['nickName'],
+      //       userData.data()['uid']
+      //     );
+      //     console.log(activeUser);
+      //     this.store.dispatch(authActions.setUser({ user: activeUser }));
+      //   });
+      // }
     });
   }
   isAuthenticated(): Promise<boolean> {
@@ -33,32 +66,16 @@ export class AuthService {
   }
 
   createUser(name: string, email: string, passWord: string): void {
-    Swal.fire({
-      title: 'Espere mientras se crea su identidad por favor',
-      willOpen: () => {
-        Swal.showLoading();
-      },
-    });
     createUserWithEmailAndPassword(this.auth, email, passWord)
       .then(({ user }) => {
-        const newUser = new User(user.uid, name, email);
-        const usersCollection = collection(this.firestore, 'Users');
-        return addDoc(usersCollection, {
+        const userRef = doc(this.firestore, `Users/${user.uid}`);
+        return setDoc(userRef, {
           uid: user.uid,
           nickName: name,
           email: email,
-        })
-          .then(() => {
-            Swal.close();
-            this.router.navigate(['/dashboard']);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
+        });
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
         Swal.fire({
           title: 'Error!',
           text: 'Do you want to continue',
@@ -68,33 +85,13 @@ export class AuthService {
       });
   }
 
-  loginUser(email: string, password: string): void {
-    Swal.fire({
-      title: 'Espere mientras se confirma su identidad por favor',
-      willOpen: () => {
-        Swal.showLoading();
-      },
-    });
-    signInWithEmailAndPassword(this.auth, email, password)
-      .then((userLogIn: UserCredential) => {
-        const user = userLogIn.user;
-        Swal.close();
-        this.router.navigate(['/']);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-
-        Swal.fire({
-          title: 'Error!',
-          text: 'Do you want to continue',
-          icon: 'error',
-          confirmButtonText: 'Cool',
-        });
-      });
+  loginUser(email: string, password: string): Promise<UserCredential> {
+    return signInWithEmailAndPassword(this.auth, email, password);
   }
+  
   logout() {
     return this.auth.signOut().then(() => {
+      this.store.dispatch(authActions.unSetUser());
       this.router.navigate(['/login']);
     });
   }
