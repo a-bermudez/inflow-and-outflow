@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
@@ -16,6 +16,12 @@ import { appReducers } from './app.reducer';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { ComponentsModule } from './components/components.module';
+
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+
+registerLocaleData(localeEs);
 
 @NgModule({
   declarations: [AppComponent],
@@ -23,6 +29,7 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
     BrowserModule,
     AppRoutingModule,
     AsyncPipe,
+    ComponentsModule,
     SharedModule,
     SweetAlert2Module.forRoot(),
     ReactiveFormsModule,
@@ -40,7 +47,7 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
       connectOutsideZone: true, // If set to true, the connection is established outside the Angular zone for better performance
     }),
   ],
-  providers: [],
+  providers: [{ provide: LOCALE_ID, useValue: 'es-ES' }],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

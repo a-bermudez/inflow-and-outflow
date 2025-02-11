@@ -42,7 +42,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
     await this.authService.createUser(nickName, email, passWord);
     this.store.dispatch(stopLoading());
     console.info('cargando ui.isLoading is ', this.loading);
-    this.router.navigate(['/dashboard']);
+    setTimeout(() => {
+      this.router.navigate(['/dashboard']);
+    }, 500);
 
     //Solo es para probar la particion de datos como está arriba,
     // este comentario es para fines academicos

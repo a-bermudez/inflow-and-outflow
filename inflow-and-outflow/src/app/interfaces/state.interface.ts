@@ -1,4 +1,5 @@
-import { User } from "../models/user.model";
+import { InflowOutflow } from '../models/inflowOutflow.model';
+import { User } from '../models/user.model';
 
 export interface State {
   isLoading: boolean;
@@ -6,9 +7,14 @@ export interface State {
 
 export interface AppState {
   ui: State;
-  user: AuthState
+  user: AuthState;
+  inflowOutflow: ItemsState;
 }
 
 export interface AuthState {
   user?: User | null;
+}
+
+export interface ItemsState {
+  items: InflowOutflow[];
 }

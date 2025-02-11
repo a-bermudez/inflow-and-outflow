@@ -15,11 +15,27 @@
           </thead>
 
           <tbody>
-            <tr>
-              <td>Descripción</td>
-              <td>Cantidad</td>
-              <td>Tipo</td>
-              <td>acciones</td>
+            <tr *ngFor="let item of inflowOutflow | inflowOutflow">
+              <td>{{ item.description }}</td>
+              <td>{{ item.amount | currency : "EUR" : "symbol" : "1.2-2" }}</td>
+              <td
+                [ngClass]="{
+                  'text-success': item.type === 'inflow',
+                  'text-danger': item.type === 'outflow'
+                }"
+              >
+                {{ item.type }}
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  (click)="deleteRow(item.id, item.type)"
+                >
+                  <i class="fa fa-trash"></i>
+                  Borrar
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
