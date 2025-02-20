@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { distinctUntilChanged, skip, Subscription, take } from 'rxjs';
+import { Subscription, distinctUntilChanged, filter } from 'rxjs';
 import { AppState } from 'src/app/interfaces/state.interface';
 import { InflowOutflow } from 'src/app/models/inflowOutflow.model';
+import { AgChartOptions } from 'ag-charts-community';
 
 @Component({
   selector: 'app-stats',
@@ -14,34 +15,58 @@ export class StatsComponent implements OnInit, OnDestroy {
   totalInflow?: number = 0;
   inflows: number = 0;
   totalOutflow?: number = 0;
-  outflow: number = 0;
+  outflows: number = 0;
+  public chartOptions!: AgChartOptions;
+  dataLoaded: boolean = false;
   constructor(private store: Store<AppState>) {}
 
   ngOnInit(): void {
     this.subscription.add(
       this.store
         .select('inflowOutflow')
-        .pipe(distinctUntilChanged(), take(2), skip(1))
+        .pipe(
+          distinctUntilChanged(),
+          filter(({ items }) => items.length > 0)
+        )
         .subscribe(({ items }) => {
-          if (items.length > 0) {
-            console.log(items);
-          }
+          this.generateStats(items);
+          this.updateChart();
+          this.dataLoaded = true;
         })
     );
   }
 
   generateStats(items: InflowOutflow[]): void {
+    this.totalInflow = 0;
+    this.inflows = 0;
+    this.totalOutflow = 0;
+    this.outflows = 0;
     for (const item of items) {
       if (item.type === 'inflow') {
         this.totalInflow += item.amount;
         this.inflows++;
       } else {
         this.totalOutflow += item.amount;
-        this.outflow++;
+        this.outflows++;
       }
     }
   }
-
+  updateChart(): void {
+    this.chartOptions = {
+      data: [
+        { Type: 'Ingresos', totalAmount: this.totalInflow },
+        { Type: 'Gastos', totalAmount: this.totalOutflow },
+      ],
+      series: [
+        {
+          type: 'donut',
+          legendItemKey: 'Type',
+          angleKey: 'totalAmount',
+          innerRadiusRatio: 0.6,
+        },
+      ],
+    };
+  }
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }

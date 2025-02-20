@@ -19,9 +19,9 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { ComponentsModule } from './components/components.module';
 
 import { registerLocaleData } from '@angular/common';
-import localeEs from '@angular/common/locales/es';
+import ESP from '@angular/common/locales/es';
 
-registerLocaleData(localeEs);
+registerLocaleData(ESP);
 
 @NgModule({
   declarations: [AppComponent],

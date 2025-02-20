@@ -73,6 +73,6 @@ export class InflowOutflowComponent implements OnInit {
           );
         });
       this.inflowForm.reset();
-    }, 2500);
+    }, 1500);
   }
 }
