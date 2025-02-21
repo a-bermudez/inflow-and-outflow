@@ -5,7 +5,10 @@ import { PipesModule } from 'src/app/pipes/pipes.module';
 
 @NgModule({
   declarations: [DetailsComponent],
-  imports: [CommonModule, PipesModule],
+  imports: [
+    CommonModule,
+    PipesModule,
+  ],
   exports: [DetailsComponent],
 })
 export class DetailsModule {}
