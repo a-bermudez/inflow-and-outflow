@@ -45,6 +45,7 @@ export class AuthService {
           }
         });
       } else {
+        this.unsubscribeSnapshot();
         this.store.dispatch(authActions.unSetUser());
       }
     });
@@ -83,11 +84,21 @@ export class AuthService {
   }
 
   logout() {
-    this.auth.signOut().then(() => {
-      this.unsubscribeSnapshot();
-      this.store.dispatch(authActions.unSetUser());
-      this.store.dispatch(unSetItems());
-      this.router.navigate(['/login']);
-    });
+    this.auth
+      .signOut()
+      .then(() => {
+        if (this.unsubscribeSnapshot) {
+          this.unsubscribeSnapshot();
+        }
+        this.store.dispatch(authActions.unSetUser());
+        this.store.dispatch(unSetItems());
+
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 0);
+      })
+      .catch((error) => {
+        console.error('Error al cerrar sesión:', error);
+      });
   }
 }
